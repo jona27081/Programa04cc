@@ -5,9 +5,12 @@
 package org.uv.programa04cc;
 
 import java.sql.Connection;
+import java.io.InputStream;
+import java.io.IOException;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -16,30 +19,41 @@ import java.util.logging.Logger;
  * @author zS20006736
  */
 public class ConexionDB {
-    
-    private static ConexionDB cx=null;
-    public static ConexionDB getInstance(){
-        if(cx==null)
-            cx= new ConexionDB();
+
+    private static ConexionDB cx = null;
+
+    public static ConexionDB getInstance() {
+        if (cx == null) {
+            cx = new ConexionDB();
+        }
         return cx;
     }
-    
-    private Connection con=null;
-    private ConexionDB(){
-        try {
-            String url="jdbc:postgresql://localhost:5433/ejemplo";
-            con =DriverManager.getConnection(url,"postgres","123456789");
-        } catch (SQLException ex) {
-            Logger.getLogger(ConexionDB.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
+
+    private Connection con = null;
+
+    private ConexionDB() {
+    Properties props = new Properties();
+    try (InputStream in = getClass().getResourceAsStream("/config.properties")) {
+        props.load(in);
+    } catch (IOException ex) {
+        Logger.getLogger(ConexionDB.class.getName()).log(Level.SEVERE, null, ex);
     }
-    
-    public boolean execute(String sql){
+    String url = props.getProperty("db.url");
+    String user = props.getProperty("db.username");
+    String password = props.getProperty("db.password");
+    try {
+        con = DriverManager.getConnection(url, user, password);
+    } catch (SQLException ex) {
+        Logger.getLogger(ConexionDB.class.getName()).log(Level.SEVERE, null, ex);
+    }
+}
+
+
+    public boolean execute() {
         return true;
     }
-    
-    public boolean execute(TransactionDB  tbd){
+
+    public boolean execute(TransactionDB tbd) {
         return tbd.execute(con);
     }
 }
